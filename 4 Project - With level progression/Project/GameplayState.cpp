@@ -14,6 +14,8 @@
 #include "Utility.h"
 #include "StateMachineExampleGame.h"
 
+#include "HealthKit.h"
+
 using namespace std;
 
 constexpr int kArrowInput = 224;
@@ -30,7 +32,7 @@ GameplayState::GameplayState(StateMachineExampleGame* pOwner)
 	, m_currentLevel(0)
 	, m_pLevel(nullptr)
 {
-	m_LevelNames.push_back("Level1.txt");
+	m_LevelNames.push_back("HealthKit.txt");
 	m_LevelNames.push_back("Level2.txt");
 	m_LevelNames.push_back("Level3.txt");
 }
@@ -221,6 +223,16 @@ void GameplayState::HandleCollision(int newPlayerX, int newPlayerY)
 			collidedGoal->Remove();
 			m_player.SetPosition(newPlayerX, newPlayerY);
 			m_beatLevel = true;
+			break;
+		}
+		case ActorType::HealthKit:
+		{
+			HealthKit* collidedHealthKit = dynamic_cast<HealthKit*>(collidedActor);
+			assert(collidedHealthKit);
+			AudioManager::GetInstance()->PlayGainLiveSound();
+			collidedHealthKit->Remove();
+			m_player.SetPosition(newPlayerX, newPlayerY);
+			m_player.IncreaseLives();
 			break;
 		}
 		default:

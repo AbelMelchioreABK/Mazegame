@@ -10,6 +10,8 @@
 #include "Goal.h"
 #include "Money.h"
 
+#include "HealthKit.h"
+
 using namespace std;
 
 Level::Level()
@@ -182,6 +184,10 @@ bool Level::ConvertLevel(int* playerX, int* playerY)
 				break;
 				break;
 			case ' ':
+				break;
+			case 'K':
+				m_pLevelData[index] = ' ';
+				m_pActors.push_back(new HealthKit(x, y));
 				break;
 			default:
 				cout << "Invalid character in level file: " << m_pLevelData[index] << endl;

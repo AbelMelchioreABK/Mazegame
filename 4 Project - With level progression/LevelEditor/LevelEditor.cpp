@@ -3,6 +3,19 @@
 #include <windows.h>
 #include <fstream>
 
+#include <direct.h>
+#include <sys/types.h>
+#include <stdio.h>
+#include <string>
+#include <map>
+
+#include <windows.h>
+#include <tchar.h> 
+#include <stdio.h>
+#include <strsafe.h>
+#pragma comment(lib, "User32.lib")
+#include <atlstr.h>
+
 using namespace std;
 
 constexpr char kCursor = '_';
@@ -35,8 +48,14 @@ void SaveLevel(char* pLevel, int width, int height);
 void DisplayLegend();
 void RunEditor(char* pLevel, int width, int height);
 
+void LevelSelector();
+map<int, string> GetLevels();
+
 int main()
 {
+
+	GetLevels();
+
 	char* pLevel = nullptr;
 	int levelWidth;
 	int levelHeight;
@@ -55,42 +74,7 @@ int main()
 
 		if (input == 1)
 		{
-			// Load Level
-			cout << "Enter Level name: ";
-			string levelName;
-			cin >> levelName;
-
-			levelName.insert(0, "../");
-
-			ifstream levelFile;
-			levelFile.open(levelName);
-
-			if (!levelFile)
-			{
-				cout << "Opening file failed!" << endl;
-			}
-			else
-			{
-				constexpr int tempSize = 25;
-				char temp[tempSize];
-
-				levelFile.getline(temp, tempSize, '\n');
-				levelWidth = atoi(temp);
-
-				levelFile.getline(temp, tempSize, '\n');
-				levelHeight = atoi(temp);
-
-				pLevel = new char[levelWidth * levelHeight];
-				levelFile.read(pLevel, levelWidth * levelHeight);
-				levelFile.close();
-
-				RunEditor(pLevel, levelWidth, levelHeight);
-
-				delete[] pLevel;
-				pLevel = nullptr;
-
-			}
-
+			LevelSelector();
 		}
 		else if (input == 2)
 		{
@@ -116,6 +100,118 @@ int main()
 
 	}
 
+}
+
+void LevelSelector()
+{
+
+	map<int, string> levels = GetLevels();
+
+	if (levels.empty())
+	{
+		cout << "No pre-existing levels. Dying." << endl;
+		return;
+	}
+
+	cout << "Select a level from the list (provide the number)" << endl;
+
+	for (auto entry : levels)
+	{
+		cout << entry.first << ". " << entry.second << endl;
+	}
+
+	int entry;
+	cin >> entry;
+
+	if (levels.find(entry) == levels.end())
+	{
+		cout << "Invalid selection." << endl;
+		return;
+	}
+
+	// Load Level
+	string levelName = levels.at(entry);
+
+	levelName.insert(0, "../");
+
+	ifstream levelFile;
+	levelFile.open(levelName);
+
+	if (!levelFile)
+	{
+		cout << "Opening file failed!" << endl;
+	}
+	else
+	{
+		constexpr int tempSize = 25;
+		char temp[tempSize];
+
+		levelFile.getline(temp, tempSize, '\n');
+		int easyLevelWidth = atoi(temp);
+		int levelWidth = atoi(temp);
+
+		levelFile.getline(temp, tempSize, '\n');
+		int levelHeight = atoi(temp);
+
+		char* pLevel = new char[levelWidth * levelHeight];
+		levelFile.read(pLevel, levelWidth * levelHeight);
+		levelFile.close();
+
+		RunEditor(pLevel, levelWidth, levelHeight);
+
+		delete[] pLevel;
+		pLevel = nullptr;
+
+	}
+}
+
+map<int, string> GetLevels()
+{
+	map<int, string> levels;
+	int counter = 1;
+	
+	string dir = "..\\*";
+
+	WIN32_FIND_DATA ffd;
+	LARGE_INTEGER filesize;
+	TCHAR szDir[MAX_PATH];
+	HANDLE hFind = INVALID_HANDLE_VALUE;
+
+	_tcscpy_s(szDir, CA2T(dir.c_str()));
+	hFind = FindFirstFile(szDir, &ffd);
+
+	if (INVALID_HANDLE_VALUE == hFind)
+	{
+		return levels;
+	}
+
+	do
+	{
+		// we don't care about directories in here
+		if (ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) { continue; }
+		else
+		{
+			filesize.LowPart = ffd.nFileSizeLow;
+			filesize.HighPart = ffd.nFileSizeHigh;
+
+			wstring ws(ffd.cFileName);
+			string normalString(ws.begin(), ws.end());
+
+			if(normalString.length() < 4)
+			{
+				continue;
+			}
+
+			string ending = normalString.substr(normalString.length() - 4);
+			if(ending.compare(".txt") == 0)
+			{
+				levels.insert(pair<int, string>(counter, string(ws.begin(), ws.end())));
+				counter++;
+			}
+		}
+	} while (FindNextFile(hFind, &ffd) != 0);
+
+	return levels;
 }
 
 void RunEditor(char* pLevel, int width, int height)
@@ -159,6 +255,8 @@ void SaveLevel(char* pLevel, int width, int height)
 	cin >> levelName;
 
 	levelName.insert(0, "../");
+
+	levelName += ".txt";
 
 	ofstream levelFile;
 	levelFile.open(levelName);
