@@ -33,7 +33,7 @@ public:
 	virtual void Draw() override;
 	Player* GetPlayer() { return &m_player; }
 	StateMachineExampleGame* GetStateMachine() { return m_pOwner; }
-	void setCompletion(bool completion) { m_beatLevel = completion; }
+	void SetCompletion(bool completion) { m_beatLevel = completion; }
 
 private:
 	void HandleCollision(int newPlayerX, int newPlayerY);

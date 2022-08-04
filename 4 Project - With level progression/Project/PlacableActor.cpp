@@ -1,4 +1,5 @@
 #include "PlacableActor.h"
+#include "GameplayState.h"
 
 PlacableActor::PlacableActor(int x, int y, ActorColor color)
 	: m_pPosition(new Point(x, y))

@@ -55,3 +55,8 @@ void Player::Draw()
 {
 	cout << "@";
 }
+
+void Player::Collide(GameplayState* state, int newX, int newY)
+{
+
+}

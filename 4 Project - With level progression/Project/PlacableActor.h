@@ -23,6 +23,8 @@ enum class ActorType
 	HealthKit
 };
 
+class GameplayState;
+
 class PlacableActor
 {
 public:
@@ -47,6 +49,7 @@ public:
 	{
 
 	}
+	virtual void Collide(GameplayState* state, int newX, int newY) = 0;
 
 protected:
 	Point* m_pPosition;

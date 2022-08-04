@@ -1,5 +1,8 @@
 #include "Enemy.h"
 #include <iostream>
+#include "AudioManager.h"
+#include "GameplayState.h"
+#include "StateMachineExampleGame.h"
 
 Enemy::Enemy(int x, int y, int deltaX, int deltaY)
 	: PlacableActor(x, y)
@@ -54,3 +57,18 @@ void Enemy::UpdateDirection(int& current, int& direction, int& movement)
 	}
 }
 
+
+void Enemy::Collide(GameplayState* state, int newX, int newY)
+{
+	AudioManager::GetInstance()->PlayLoseLivesSound();
+	this->Remove();
+	state->GetPlayer()->SetPosition(newX, newY);
+
+	state->GetPlayer()->DecrementLives();
+	if (state->GetPlayer()->GetLives() < 0)
+	{
+		//TODO: Go to game over screen
+		AudioManager::GetInstance()->PlayLoseSound();
+		state->GetStateMachine()->LoadScene(StateMachineExampleGame::SceneName::Lose);
+	}
+}

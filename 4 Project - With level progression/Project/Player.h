@@ -24,6 +24,8 @@ public:
 
 	virtual ActorType GetType() override { return ActorType::Player; }
 	virtual void Draw() override;
+	void Collide(GameplayState* state, int newX, int newY);
+
 private:
 	Key* m_pCurrentKey;
 	int m_money;

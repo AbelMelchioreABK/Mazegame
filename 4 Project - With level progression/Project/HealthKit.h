@@ -7,5 +7,6 @@ class HealthKit : public PlacableActor
 
 		virtual ActorType GetType() override { return ActorType::HealthKit; }
 		virtual void Draw() override;
+		void Collide(GameplayState* state, int newX, int newY);
 };
 
